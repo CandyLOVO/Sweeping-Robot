@@ -77,20 +77,20 @@ void RobotCMDInit(void)
     sensor_sub   = SubRegister("sensor_fetch", sizeof(Sensor_Upload_Data_s)); // 注册悬崖数据主题  
     robot_status = ROBOT_READY;                                               // 设置机器人状态为准备就绪  
 
-    strcpy(data_pc_start, "AT+RST\r\n\r\n");  
-    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);  
+    // strcpy(data_pc_start, "AT+RST\r\n\r\n");  
+    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);  
 
-    DWT_Delay(5);
+    // DWT_Delay(5);
 
-    strcpy(data_pc_start, "AT+CWMODE=1\r\n\r\n");
-    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
+    // strcpy(data_pc_start, "AT+CWMODE=1\r\n\r\n");
+    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
 
-    DWT_Delay(5);
+    // DWT_Delay(5);
 
-    strcpy(data_pc_start, "AT+CIPSTART=\"TCP\",\"192.168.215.165\",8080\r\n\r\n");
-    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
-    strcpy(data_pc_start, "AT+CIPMODE=0\r\n\r\n");
-    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
+    // strcpy(data_pc_start, "AT+CIPSTART=\"TCP\",\"192.168.215.165\",8080\r\n\r\n");
+    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
+    // strcpy(data_pc_start, "AT+CIPMODE=0\r\n\r\n");
+    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
 }
 
 void RobotCMDTask(void)
@@ -99,12 +99,12 @@ void RobotCMDTask(void)
     SubGetMessage(chassis_fetch_sub, &chassis_fetch_data); //从机器人底盘获取数据
     SubGetMessage(sensor_sub, &sensor_fetch_data);         //从传感器获取数据
 
-    strcpy(data_pc_start, "AT+CIPSEND=1\r\n\r\n");
-    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
-    strcpy(data_pc_start, "1");
-    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
-    // data_pc = 1;
-    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc, strlen(data_pc), HAL_MAX_DELAY);
+    // strcpy(data_pc_start, "AT+CIPSEND=1\r\n\r\n");
+    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
+    // strcpy(data_pc_start, "1");
+    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
+    // // data_pc = 1;
+    // // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc, strlen(data_pc), HAL_MAX_DELAY);
 
     float dt = chassis_fetch_data.dt;
     //导航模式 CHASSIS_GOTO_POINT
@@ -167,12 +167,12 @@ static void RobotEnableSet(KEY_Instance *key)
             robot_status = ROBOT_READY; // 设置机器人状态为准备运行
 
             //以下三种控制方式只选择一种
-            // RobotModeSet(key_r);  // 右按键控制，偶数次：悬崖传感器及其响应；奇数次：上位机控制
+            RobotModeSet(key_r);  // 右按键控制，偶数次：悬崖传感器及其响应；奇数次：上位机控制
             
-            if (goal_executed == 0) 
-            {
-                RobotGoTo(); 
-            }
+            // if (goal_executed == 0) 
+            // {
+            //     RobotGoTo(); 
+            // }
 
             // VisionControl(); // 上位机控制
             break;
