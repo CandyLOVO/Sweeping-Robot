@@ -265,7 +265,7 @@ static void VisionControl(void)
     } else {
         chassis_cmd_send.chassis_mode = CHASSIS_NORMAL;
     }
-    // Set the chassis command based on the vision control
+    //根据视觉控制设置底盘指令
     chassis_cmd_send.vx = vision_ctrl->vx;
     chassis_cmd_send.wz = vision_ctrl->wz;
 }
