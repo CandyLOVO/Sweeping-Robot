@@ -7,11 +7,6 @@
 #include "bsp_init.h"
 #include "LED.h"
 
-
-/**
- * @brief Initialize the robot's hardware and peripherals.
- *
- */
 void Robot_Init(void)
 {
     // Initialize the robot's hardware and peripherals here
