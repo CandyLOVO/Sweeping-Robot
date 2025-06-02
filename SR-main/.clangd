@@ -1,0 +1,11 @@
+CompileFlags:
+    Add:
+        - -Ic:\users\q7591\.eide\tools\gcc_arm\arm-none-eabi\include\newlib-nano
+        - -Ic:\users\q7591\.eide\tools\gcc_arm\arm-none-eabi\include\c++\10.2.1
+        - -Ic:\users\q7591\.eide\tools\gcc_arm\arm-none-eabi\include\c++\10.2.1\arm-none-eabi\thumb\v7e-m+fp\hard
+        - -Ic:\users\q7591\.eide\tools\gcc_arm\arm-none-eabi\include\c++\10.2.1\backward
+        - -Ic:\users\q7591\.eide\tools\gcc_arm\lib\gcc\arm-none-eabi\10.2.1\include
+        - -Ic:\users\q7591\.eide\tools\gcc_arm\lib\gcc\arm-none-eabi\10.2.1\include-fixed
+        - -Ic:\users\q7591\.eide\tools\gcc_arm\arm-none-eabi\include
+    CompilationDatabase: ./build/Debug
+    Compiler: C:\Users\q7591\.eide\tools\gcc_arm\bin\arm-none-eabi-g++.exe

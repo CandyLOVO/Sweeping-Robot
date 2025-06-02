@@ -1,0 +1,6 @@
+{
+    "cortex-debug.armToolchainPath": "C:\\Users\\15656\\.eide\\tools\\gcc_arm\\bin",
+    "cortex-debug.openocdPath": "C:\\Users\\15656\\.eide\\tools\\openocd_7a1adfbec_mingw32\\bin\\openocd.exe",
+    "stm32-for-vscode.openOCDPath":"C:\\Users\\15656\\.eide\\tools\\openocd_7a1adfbec_mingw32\\bin\\openocd.exe",
+    "stm32-for-vscode.armToolchainPath": "C:\\Users\\15656\\.eide\\tools\\gcc_arm\\bin"
+}

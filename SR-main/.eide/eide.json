@@ -1,0 +1,152 @@
+{
+  "name": "SR",
+  "type": "ARM",
+  "dependenceList": [],
+  "srcDirs": [
+    "Core",
+    "Drivers",
+    "Middlewares",
+    "Application",
+    "BSP",
+    "Module"
+  ],
+  "virtualFolder": {
+    "name": "<virtual_root>",
+    "files": [],
+    "folders": [
+      {
+        "name": "start",
+        "files": [
+          {
+            "path": "startup_stm32f407xx.s"
+          },
+          {
+            "path": "Middlewares/ST/ARM/DSP/Lib/libarm_cortexM4lf_math.a"
+          }
+        ],
+        "folders": []
+      }
+    ]
+  },
+  "outDir": "build",
+  "deviceName": null,
+  "packDir": null,
+  "miscInfo": {
+    "uid": "c56453cdee600b1640a04dcc473c8562"
+  },
+  "targets": {
+    "Debug": {
+      "excludeList": [],
+      "toolchain": "GCC",
+      "compileConfig": {
+        "cpuType": "Cortex-M4",
+        "floatingPointHardware": "single",
+        "scatterFilePath": "STM32F407XX_FLASH.ld",
+        "useCustomScatterFile": true,
+        "storageLayout": {
+          "RAM": [],
+          "ROM": []
+        },
+        "options": "null"
+      },
+      "uploader": "OpenOCD",
+      "uploadConfig": {
+        "bin": "",
+        "target": "stm32f4x",
+        "interface": "stlink",
+        "baseAddr": "0x08000000"
+      },
+      "uploadConfigMap": {
+        "JLink": {
+          "bin": "",
+          "baseAddr": "",
+          "cpuInfo": {
+            "vendor": "null",
+            "cpuName": "null"
+          },
+          "proType": 1,
+          "speed": 8000,
+          "otherCmds": ""
+        }
+      },
+      "custom_dep": {
+        "name": "default",
+        "incList": [
+          "Core/Inc",
+          "Drivers/STM32F4xx_HAL_Driver/Inc",
+          "Drivers/STM32F4xx_HAL_Driver/Inc/Legacy",
+          "Middlewares/Third_Party/FreeRTOS/Source/include",
+          "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
+          "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
+          "Drivers/CMSIS/Device/ST/STM32F4xx/Include",
+          "Drivers/CMSIS/Include",
+          "Middlewares/ST/ARM/DSP/Inc",
+          "Application",
+          "BSP",
+          "BSP/DWT",
+          "BSP/USART",
+          "Application/cmd",
+          "Module/message_center",
+          "Module",
+          "Module/LED",
+          "Module/key",
+          "BSP/GPIO",
+          "Application/chassis",
+          "Module/LED/led_task",
+          "Module/motor",
+          "Module/motor/wheelmotor",
+          "Module/algorithm",
+          "BSP/CAN",
+          "Module/daemon",
+          "BSP/PWM",
+          "BSP/ENCODER",
+          "Module/miniPC",
+          "Module/referee",
+          "Module/JY901S",
+          "Module/JY901S/wit_c_sdk",
+          "Module/infrared",
+          "Application/sensors",
+          "Module/cliff",
+          "BSP/ADC"
+        ],
+        "libList": [
+          "Middlewares/ST/ARM/DSP/Lib"
+        ],
+        "defineList": [
+          "USE_HAL_DRIVER",
+          "STM32F407xx",
+          "ARM_MATH_CM4",
+          "__FPU_PRESENT=1U"
+        ]
+      },
+      "builderOptions": {
+        "GCC": {
+          "version": 5,
+          "beforeBuildTasks": [],
+          "afterBuildTasks": [],
+          "global": {
+            "$float-abi-type": "hard",
+            "output-debug-info": "enable",
+            "misc-control": "--specs=nosys.specs --specs=nano.specs"
+          },
+          "c/cpp-compiler": {
+            "language-c": "c11",
+            "language-cpp": "c++11",
+            "optimization": "level-debug",
+            "warnings": "all-warnings",
+            "one-elf-section-per-function": true,
+            "one-elf-section-per-data": true
+          },
+          "asm-compiler": {},
+          "linker": {
+            "output-format": "elf",
+            "remove-unused-input-sections": true,
+            "LIB_FLAGS": "-lm",
+            "$toolName": "auto"
+          }
+        }
+      }
+    }
+  },
+  "version": "3.5"
+}
