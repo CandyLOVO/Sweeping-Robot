@@ -13,43 +13,40 @@
 #include <string.h>
 #include "bsp_dwt.h"
 
-static Robot_Status_e robot_status = ROBOT_STOP;    // The status of the robot
-static Obstacle_State_e obs_state  = OBSTACLE_NONE; // The state of the obstacle
+static Robot_Status_e robot_status = ROBOT_STOP;    // 机器人的状态  
+static Obstacle_State_e obs_state  = OBSTACLE_NONE; // 障碍物的状态  
 
-static KEY_Instance *key_l, *key_r; // The key instance for left and right
-static Vision_Recv_s *vision_ctrl;  // The vision receive data
+static KEY_Instance *key_l, *key_r; // 左右按键实例  
+static Vision_Recv_s *vision_ctrl;  // 视觉接收数据  
 
-static Chassis_Ctrl_Cmd_s chassis_cmd_send;      // The command to send to the robot chassis
-static Chassis_Upload_Data_s chassis_fetch_data; // The data to fetch from the robot chassis
-static Sensor_Upload_Data_s sensor_fetch_data;   // The data to upload from the sensors
-static Publisher_t *chassis_cmd_pub;             // The publisher for the command topic
-static Publisher_t *robot_state_pub;             // The publisher for the robot state
-static Subscriber_t *chassis_fetch_sub;          // The subscriber for the command topic
-static Subscriber_t *sensor_sub;
+static Chassis_Ctrl_Cmd_s chassis_cmd_send;      // 发送给机器人底盘的控制指令  
+static Chassis_Upload_Data_s chassis_fetch_data; // 从机器人底盘获取的数据  
+static Sensor_Upload_Data_s sensor_fetch_data;   // 从传感器上传的数据  
+static Publisher_t *chassis_cmd_pub;             // 控制指令主题的发布者  
+static Publisher_t *robot_state_pub;             // 机器人状态的发布者  
+static Subscriber_t *chassis_fetch_sub;          // 控制指令主题的订阅者  
+static Subscriber_t *sensor_sub;                  // 传感器数据的订阅者  
 
-static int cliff_trigger_idx     = -1; // 触发的是哪个传感器
-static float rotate_target_angle = 0.0f;
-static float yaw_start           = 0.0f;
-static float yaw_error_cliif     = 0.0f;
-static float norm; // Check the quaternion norm
+static int cliff_trigger_idx     = -1; // 触发的是哪个悬崖传感器  
+static float rotate_target_angle = 0.0f; // 目标旋转角度  
+static float yaw_start           = 0.0f; // 起始偏航角  
+static float yaw_error_cliif     = 0.0f; // 悬崖引起的偏航误差  
+static float norm; // 四元数的模长校验  
 
-static char data_pc_start[256];
+static char data_pc_start[256]; // PC数据起始缓存区  
 
-static JY901S_attitude_t *attitude_cmd = NULL;
+static JY901S_attitude_t *attitude_cmd = NULL; // 姿态传感器指令数据  
 
-static Pose2D_t init_pose = {0};               /* 机器人上电原点 (0,0,0°) */
-static void RobotStop(void);                   // The function to stop the robot
-static void RobotEnableSet(KEY_Instance *key); // The function to set the robot mode
-static void RobotModeSet(KEY_Instance *key);
-static void ObstacleAvoidance(void); // The function to set the robot mode to obstacle avoidance
-static void RobotGoTo(void);
+static Pose2D_t init_pose = {0};               //机器人上电时的初始位置 (0,0,0°)
+static void RobotStop(void);                   // 停止机器人的函数  
+static void RobotEnableSet(KEY_Instance *key); // 设置机器人使能模式的函数  
+static void RobotModeSet(KEY_Instance *key);   // 设置机器人工作模式的函数  
+static void ObstacleAvoidance(void);            // 障碍物避让功能函数  
+static void RobotGoTo(void);                     // 机器人前往指定点的函数  
 
-static void VisionControl(void);
+static void VisionControl(void);                 // 视觉控制函数  
 
-/**
- * @brief 机器人核心控制任务初始化,会被RobotInit()调用
- *
- */
+//机器人核心控制任务初始化,会被RobotInit()调用
 void RobotCMDInit(void)
 {
     attitude_cmd = INS_Init(); // Initialize the JY901S sensor
@@ -62,7 +59,7 @@ void RobotCMDInit(void)
             .pin_state = GPIO_PIN_SET,
             .exti_mode = GPIO_EXTI_MODE_FALLING,
         },
-        .on_press = NULL, // No callback for now
+        .on_press = NULL, //现在不返回
     };
     key_l                           = KEYRegister(&key_config);
     key_config.gpio_config.GPIOx    = KEY_R_GPIO_Port;
@@ -70,39 +67,24 @@ void RobotCMDInit(void)
     key_r                           = KEYRegister(&key_config);
 
     vision_ctrl = VisionInit(&huart1); // 初始化视觉控制
-    GotoCtrl_Init(&init_pose);         /* 初始化控制器 */
+    GotoCtrl_Init(&init_pose); //初始化控制器
 
-    // Register the command topic for the robot chassis
-    chassis_cmd_pub   = PubRegister("chassis_cmd", sizeof(Chassis_Ctrl_Cmd_s));
-    chassis_fetch_sub = SubRegister("chassis_fetch", sizeof(Chassis_Upload_Data_s));
-    robot_state_pub   = PubRegister("robot_state", sizeof(Robot_Status_e));
-    // Register the command topic for the sensors
-    sensor_sub   = SubRegister("sensor_fetch", sizeof(Sensor_Upload_Data_s)); // Register the cliff data topic
-    robot_status = ROBOT_READY;                                               // Set the robot status to ready
+    // 注册机器人底盘的控制指令主题  
+    chassis_cmd_pub   = PubRegister("chassis_cmd", sizeof(Chassis_Ctrl_Cmd_s));  
+    chassis_fetch_sub = SubRegister("chassis_fetch", sizeof(Chassis_Upload_Data_s));  
+    robot_state_pub   = PubRegister("robot_state", sizeof(Robot_Status_e));  
+    // 注册传感器的命令主题  
+    sensor_sub   = SubRegister("sensor_fetch", sizeof(Sensor_Upload_Data_s)); // 注册悬崖数据主题  
+    robot_status = ROBOT_READY;                                               // 设置机器人状态为准备就绪  
 
-    strcpy(data_pc_start, "AT+RST\r\n\r\n");
-    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
-    // volatile unsigned int i, j;
-    //     for (i = 0; i < 6000; i++) {
-    //     // 内层循环
-    //     for (j = 0; j < 2800*5; j++) {
-    //         // 空循环，volatile防止被优化掉
-    //         __asm__ volatile ("nop");
-    //     }
-    // }
+    strcpy(data_pc_start, "AT+RST\r\n\r\n");  
+    HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);  
+
     DWT_Delay(5);
 
     strcpy(data_pc_start, "AT+CWMODE=1\r\n\r\n");
     HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
-    // strcpy(data_pc_start, "AT+CWJAP=\"mechax\",\"12345678\"\r\n\r\n");
-    // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
-    //      for (i = 0; i < 6000; i++) {
-    //     // 内层循环
-    //     for (j = 0; j < 2800*5; j++) {
-    //         // 空循环，volatile防止被优化掉
-    //         __asm__ volatile ("nop");
-    //     }
-    // }
+
     DWT_Delay(5);
 
     strcpy(data_pc_start, "AT+CIPSTART=\"TCP\",\"192.168.215.165\",8080\r\n\r\n");
@@ -114,8 +96,8 @@ void RobotCMDInit(void)
 void RobotCMDTask(void)
 {
     // Get the modules status
-    SubGetMessage(chassis_fetch_sub, &chassis_fetch_data); // Get the data from the robot chassis
-    SubGetMessage(sensor_sub, &sensor_fetch_data);         // Get the data from the sensors
+    SubGetMessage(chassis_fetch_sub, &chassis_fetch_data); //从机器人底盘获取数据
+    SubGetMessage(sensor_sub, &sensor_fetch_data);         //从传感器获取数据
 
     strcpy(data_pc_start, "AT+CIPSEND=1\r\n\r\n");
     HAL_UART_Transmit(&huart3, (uint8_t *)data_pc_start, strlen(data_pc_start), HAL_MAX_DELAY);
@@ -137,65 +119,66 @@ void RobotCMDTask(void)
         chassis_cmd_send.vx = out.vx;
         chassis_cmd_send.wz = out.wz;
 
-        /* 到点即停 */
+        //到点即停
         if (GotoCtrl_IsArrived()) {
             chassis_cmd_send.chassis_mode = CHASSIS_ZERO_FORCE;
         }
     }
     RobotEnableSet(key_l); //左按键控制扫地机运行模式
 
-    // TODO: Get the command from the PC and set the vx and wz values
+// TODO: 从PC获取指令并设置vx和wz的值
 
-    PubPushMessage(chassis_cmd_pub, (void *)&chassis_cmd_send); // Publish the command to the robot chassis
-    PubPushMessage(robot_state_pub, (void *)&robot_status);     // Publish the robot state to the PC
+PubPushMessage(chassis_cmd_pub, (void *)&chassis_cmd_send); // 发布指令到机器人底盘
+PubPushMessage(robot_state_pub, (void *)&robot_status);     // 发布机器人状态到PC
 
-    // TODO: Publish the data to the PC
-    float vx, wz, ax, ay, az;
-    vx         = chassis_fetch_data.real_vx;
-    wz         = chassis_fetch_data.real_wz;
-    float q[4] = {attitude_cmd->Quaternion[0],
-                  +attitude_cmd->Quaternion[1],
-                  +attitude_cmd->Quaternion[2],
-                  +attitude_cmd->Quaternion[3]};
+// TODO: 向PC发布数据
+float vx, wz, ax, ay, az;
+vx = chassis_fetch_data.real_vx;
+wz = chassis_fetch_data.real_wz;
+float q[4] = {attitude_cmd->Quaternion[0],
+              +attitude_cmd->Quaternion[1],
+              +attitude_cmd->Quaternion[2],
+              +attitude_cmd->Quaternion[3]};
 
-    ax = attitude_cmd->Accel[0];
-    ay = attitude_cmd->Accel[1];
-    az = attitude_cmd->Accel[2];
+ax = attitude_cmd->Accel[0];
+ay = attitude_cmd->Accel[1];
+az = attitude_cmd->Accel[2];
 
-    norm = sqrtf(q[0] * q[0] + q[1] * q[1] +
-                 +q[2] * q[2] + q[3] * q[3]); // Check the quaternion norm
-    VisionValueSet(vx, wz, q, ax, ay, az);    // Send the data to the PC
+norm = sqrtf(q[0] * q[0] + q[1] * q[1] +
+             +q[2] * q[2] + q[3] * q[3]); // 检查四元数的模长
+VisionValueSet(vx, wz, q, ax, ay, az);    // 发送数据到PC
 
-    VisionSend(); // Send the data to the PC
+VisionSend(); // 发送数据到PC
 }
 
-static uint8_t goal_executed = 0; /* 0 = 还没跑过 GOTO, 1 = 已执行 */
+static uint8_t goal_executed = 0; // 0 = 还没跑过 GOTO, 1 = 已执行
 
 static void RobotEnableSet(KEY_Instance *key)
 {
-    // Check the key count to determine the mode
+    // 根据按键次数判断模式
     switch (key->count % 2) {
-        //按键偶数停止
+        // 按键次数为偶数时停止机器人
         case 0:
             RobotStop();
             goal_executed = 0;
             break;
-        //按键奇数运行
+        // 按键次数为奇数时启动机器人
         default:
-            robot_status = ROBOT_READY; // Set the robot status to run
+            robot_status = ROBOT_READY; // 设置机器人状态为准备运行
 
-            /***** Only Select one of the below three options  *****/
-            // RobotModeSet(key_r);  //右按键控制，偶数次：悬崖传感器及其响应；奇数次：上位机控制
+            //以下三种控制方式只选择一种
+            // RobotModeSet(key_r);  // 右按键控制，偶数次：悬崖传感器及其响应；奇数次：上位机控制
             
             if (goal_executed == 0) 
             {
                 RobotGoTo(); 
             }
 
-            // VisionControl(); //上位机控制
+            // VisionControl(); // 上位机控制
             break;
     }
 }
+
 
 __unused static void RobotModeSet(KEY_Instance *key_r)
 {

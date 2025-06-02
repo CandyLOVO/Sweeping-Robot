@@ -6,27 +6,27 @@
 #define RAD2DEG        57.2957795f
 #define CLAMP(x, l, h) (((x) < (l)) ? (l) : ((x) > (h) ? (h) : (x)))
 
-/* === 状态枚举 === */
+//状态枚举
 typedef enum {
     TURN_TO,
     DRIVE_TO,
     ARRIVED
 } GoToState_e;
 
-/* === 内部状态 === */
+//内部状态
 static Pose2D_t odom     = {0}; // 实时位置估计
 static Pose2D_t goal     = {0}; // 当前目标
 static GoToState_e state = ARRIVED;
 
-/* === 参数 === */
+// 参数
 static const float yaw_eps  = 10.0f; // 转向结束阈值 (deg)
 static const float dist_eps = 0.03f; // 到点距离阈值 (m)
 
-/* === PID 控制器 === */
+//PID 控制器
 static PID_Instance dist_pid;
 static PID_Instance yaw_pid;
 
-/* === 工具函数 === */
+//工具函数
 static inline float angle_diff_deg(float a, float b)
 {
     float d = a - b;
@@ -43,7 +43,7 @@ static void odom_update(float vx, float dt_s, float imu_yaw_deg)
     odom.yaw = imu_yaw_deg;
 }
 
-/* === 接口函数 === */
+//接口函数
 void GotoCtrl_Init(const Pose2D_t *init_pose)
 {
     odom  = *init_pose;
@@ -85,10 +85,10 @@ VelocityCmd_t GotoCtrl_Step(float real_vx, float real_wz,
 {
     VelocityCmd_t cmd = {0};
 
-    /* 1. 里程计更新 */
+    // 里程计更新
     odom_update(real_vx, dt_s, imu_yaw_deg);
 
-    /* 2. 误差计算 */
+    //误差计算
     float dx      = goal.x - odom.x;
     float dy      = goal.y - odom.y;
     float dist    = sqrtf(dx * dx + dy * dy);
