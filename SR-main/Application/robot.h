@@ -1,7 +1,13 @@
 #pragma once
 
-//初始化机器人所有硬件模块和外设
+/**
+ * @brief Initialize the robot's hardware and peripherals.
+ *
+ */
 void Robot_Init(void);
 
-//负责处理实时控制逻辑、传感器数据融合
+/**
+ * @brief The task entry point for the robot.
+ *
+ */
 void RobotTask(void);
