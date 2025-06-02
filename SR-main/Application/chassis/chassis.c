@@ -14,19 +14,19 @@
 
 #define WHEEL_BASE 0.24f // 轮距，单位：米
 
-static Chassis_Ctrl_Cmd_s chassis_cmd_recv;       // The command to receive from the robot_cmd
-static Chassis_Upload_Data_s chassis_upload_data; // The data to upload to the robot_cmd
+static Chassis_Ctrl_Cmd_s chassis_cmd_recv;       // 从 robot_cmd 接收到的控制指令  
+static Chassis_Upload_Data_s chassis_upload_data; // 上传到 robot_cmd 的反馈数据  
 
-static Publisher_t *chassis_upload_pub;                                          // The publisher for the upload topic
-static Subscriber_t *chassis_cmd_sub;                                            // The subscriber for the command topic
-static JY901S_attitude_t *attitude = NULL;                                       // Added missing variable declaration
-static WheelMotor_Instance *motor_l, *motor_r;                                   // The left and right wheel motors
-static float chassis_vx, chassis_wz;                                             // The forward speed and angular speed of the robot
-static float wheel_l_ref, wheel_r_ref;                                           // The reference speed of the left and right wheels
-static float real_vx, real_wz;                                                   // The real speed and angular speed of the robot
-static float wheel_l_speed, wheel_r_speed, wheel_l_speed_aps, wheel_r_speed_aps; // The speed of the left and right wheels
-static ChassisSpeedKF_t gSpeedKF;
-static uint32_t dwt_last = 0; // Last time for speed estimation
+static Publisher_t *chassis_upload_pub;                                          // 上传主题的发布者  
+static Subscriber_t *chassis_cmd_sub;                                            // 指令主题的订阅者  
+static JY901S_attitude_t *attitude = NULL;                                       // 姿态传感器变量声明（缺失补充）  
+static WheelMotor_Instance *motor_l, *motor_r;                                   // 左右轮电机实例  
+static float chassis_vx, chassis_wz;                                             // 机器人线速度和角速度  
+static float wheel_l_ref, wheel_r_ref;                                           // 左右轮的目标速度参考值  
+static float real_vx, real_wz;                                                   // 机器人实际线速度和角速度  
+static float wheel_l_speed, wheel_r_speed, wheel_l_speed_aps, wheel_r_speed_aps; // 左右轮速度及其角速度  
+static ChassisSpeedKF_t gSpeedKF;                                                // 速度卡尔曼滤波器实例  
+static uint32_t dwt_last = 0;                                                    // 上一次速度估计的时间戳  
 
 static PID_Instance yaw_pid;
 static float target_yaw, yaw_error;
