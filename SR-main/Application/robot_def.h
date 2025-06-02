@@ -1,15 +1,3 @@
-/**
- * @file robot_def.h
- * @author Bi Kaixiang (wexhicy@gmail.com)
- * @brief The definition of the robot,
- *          which contains the parameters and functionalities of the robot.
- * @version 0.1
- * @date 2025-04-10
- *
- * @copyright Copyright (c) 2025
- *
- */
-
 #pragma once
 
 #include "stdint.h"

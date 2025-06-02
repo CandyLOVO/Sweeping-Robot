@@ -7,10 +7,10 @@
 #include "message_center.h"
 #include "string.h"
 
-static IR_Instance *ir_l, *ir_r;
-static Cliff_Instance *cliff_instance = NULL;   // Static instance of Cliff_Instance
-static Sensor_Upload_Data_s sensor_upload_data; // The data to upload from the sensors
-static Publisher_t *sensor_pub = NULL;          // Publisher for sensor data
+static IR_Instance *ir_l, *ir_r;                  // 左右红外传感器实例指针
+static Cliff_Instance *cliff_instance = NULL;   // 悬崖传感器实例（静态变量）
+static Sensor_Upload_Data_s sensor_upload_data; // 传感器上传数据结构体
+static Publisher_t *sensor_pub = NULL;          // 传感器数据发布者句柄
 
 static void Infrared_Callback(IR_Instance *ir)
 {
