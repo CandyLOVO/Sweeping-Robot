@@ -1,14 +1,3 @@
-/**
- * @file robot_task.h
- * @author Bi Kaixiang (wexhicy@gmail.com)
- * @brief The Task for the robot's freeRTOS
- * @version 0.1
- * @date 2025-04-04
- *
- * @copyright Copyright (c) 2025
- *
- */
-
 #pragma once
 
 #include "FreeRTOS.h"
@@ -29,29 +18,38 @@ osThreadId_t StartMotorTaskHandle;
 osThreadId_t StartSensorTaskHandle;
 osThreadId_t StartDaemonTaskHandle;
 
+// 机器人主任务线程,高于正常优先级
 const osThreadAttr_t StartRobotTask_attributes = {
     .name       = "StartRobotTask",
-    .stack_size = 1024 * 4, // Multiply by 4 to convert to bytes
+    .stack_size = 1024 * 4, // 乘以4转换为字节（4KB堆栈）
     .priority   = (osPriority_t)osPriorityAboveNormal,
 };
+
+// LED控制任务线程,正常优先级
 const osThreadAttr_t StartLEDTask_attributes = {
     .name       = "StartLEDTask",
-    .stack_size = 128 * 4, // Multiply by 4 to convert to bytes
+    .stack_size = 128 * 4, // 乘以4转换为字节（0.5KB堆栈）
     .priority   = (osPriority_t)osPriorityNormal,
 };
+
+// 电机控制任务线程,正常优先级
 const osThreadAttr_t StartMotorTask_attributes = {
     .name       = "StartMotorTask",
-    .stack_size = 1024 * 4, // Multiply by 4 to convert to bytes
+    .stack_size = 1024 * 4, // 乘以4转换为字节（4KB堆栈）
     .priority   = (osPriority_t)osPriorityNormal,
 };
+
+// 传感器采集任务线程,正常优先级
 const osThreadAttr_t StartSensorTask_attributes = {
     .name       = "StartSensorTask",
-    .stack_size = 128 * 4, // Multiply by 4 to convert to bytes
+    .stack_size = 128 * 4, // 乘以4转换为字节（0.5KB堆栈）
     .priority   = (osPriority_t)osPriorityNormal,
 };
+
+// 守护进程任务线程,正常优先级
 const osThreadAttr_t StartDAEMONTASK_attributes = {
     .name       = "StartDAEMONTASK",
-    .stack_size = 128 * 4, // Multiply by 4 to convert to bytes
+    .stack_size = 128 * 4, // 乘以4转换为字节（0.5KB堆栈）
     .priority   = (osPriority_t)osPriorityNormal,
 };
 
@@ -74,12 +72,7 @@ void OSTaskInit(void)
     StartDaemonTaskHandle = osThreadNew(StartDAEMONTASK, NULL, &StartDAEMONTASK_attributes);
 }
 
-/**
- * @brief The main task for the robot,
- * this task will be used to control the robot and handle the messages from PC.
- *
- * @param argument
- */
+//机器人的整体控制及与上位机的通信处理
 void StartRobotTask(void *argument)
 {
     /* USER CODE BEGIN StartRobotTask */
@@ -92,12 +85,7 @@ void StartRobotTask(void *argument)
     /* USER CODE END StartRobotTask */
 }
 
-/**
- * @brief The task for the LED,
- * this task will be used to control the LED and handle the messages from cmd.
- *
- * @param argument
- */
+//LED状态控制及命令处理
 void StartLEDTask(void *argument)
 {
     /* USER CODE BEGIN StartLEDTask */
@@ -110,12 +98,7 @@ void StartLEDTask(void *argument)
     /* USER CODE END StartLEDTask */
 }
 
-/**
- * @brief The task for the motor,
- * this task will be used to control the motor and read the encoder.
- *
- * @param argument
- */
+//电机驱动及编码器数据读取
 void StartMotorTask(void *argument)
 {
 
@@ -128,12 +111,7 @@ void StartMotorTask(void *argument)
     /* USER CODE END StartMotorTask */
 }
 
-/**
- * @brief The task for the sensor,
- * this task will be used to control the sensor and read the data.
- *
- * @param argument
- */
+//传感器控制及数据读取
 void StartSensorTask(void *argument)
 {
     /* USER CODE BEGIN StartSensorTask */
@@ -146,10 +124,7 @@ void StartSensorTask(void *argument)
     /* USER CODE END StartSensorTask */
 }
 
-/**
- * @brief 守护线程任务,100Hz,相当于看门狗
- *
- */
+// 守护线程任务,100Hz,相当于看门狗
 void StartDAEMONTASK(void *argument)
 {
     static float daemon_dt __attribute__((unused)); // for cancel warning
