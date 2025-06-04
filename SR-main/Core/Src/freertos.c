@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "robot.h" // Include the robot's header file for hardware initialization
+#include "robot.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -71,7 +71,7 @@ void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
   */
 void MX_FREERTOS_Init(void) {
   /* USER CODE BEGIN Init */
-    Robot_Init(); // Initialize the robot's hardware and peripherals
+    Robot_Init(); //机器人初始化
   /* USER CODE END Init */
 
   /* USER CODE BEGIN RTOS_MUTEX */

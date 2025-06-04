@@ -4,6 +4,8 @@
 #include "stm32f4xx_it.h"
 #include "general_def.h"
 
+
+float eul_raw[3];
 /* ========== 1. 轴映射配置 ========== */
 /*
  * 目标: 让 IMU 输出最终落到机器人 base_link 坐标
@@ -152,7 +154,7 @@ static void JY901S_Parsedata(void)
                 break;
             case 0x53:
                 memcpy(&stcAngle, &INS->rx_data.rx_buffer[2 + i * JY901S_FRAME_LEN], 8);
-                float eul_raw[3];
+                
                 /* JY901S 文档：Roll-Yaw‑Pitch，一定要注意！ */
                 eul_raw[0] = (float)stcAngle.Angle[1] / 32768.f * 180.f; // roll
                 eul_raw[1] = (float)stcAngle.Angle[0] / 32768.f * 180.f; // yaw

@@ -1,6 +1,7 @@
+//整体调用控制，FreeRTOS 系统中 RobotTask 的 RobotCMDTask 控制任务运行
 #include "robot_cmd.h"
 #include "robot_def.h"
-#include "goto_controller.h"
+#include "controller.h"
 
 #include "key.h"
 #include "message_center.h"
@@ -12,6 +13,10 @@
 #include "math.h"
 #include <string.h>
 #include "bsp_dwt.h"
+
+#include "JY901S_typedef.h"
+
+extern float eul_raw[3];
 
 static Robot_Status_e robot_status = ROBOT_STOP;    // 机器人的状态  
 static Obstacle_State_e obs_state  = OBSTACLE_NONE; // 障碍物的状态  
@@ -33,7 +38,8 @@ static float yaw_start           = 0.0f; // 起始偏航角
 static float yaw_error_cliif     = 0.0f; // 悬崖引起的偏航误差  
 static float norm; // 四元数的模长校验  
 
-static char data_pc_start[256]; // PC数据起始缓存区  
+static char data_pc_start[256]; // PC数据起始缓存区
+uint8_t buffer[14];
 
 static JY901S_attitude_t *attitude_cmd = NULL; // 姿态传感器指令数据  
 
@@ -49,9 +55,8 @@ static void VisionControl(void);                 // 视觉控制函数
 //机器人核心控制任务初始化,会被RobotInit()调用
 void RobotCMDInit(void)
 {
-    attitude_cmd = INS_Init(); // Initialize the JY901S sensor
+    attitude_cmd = INS_Init(); //JY901S陀螺仪初始化
 
-    // Initialize the key instances
     KEY_Config_s key_config = {
         .gpio_config = {
             .GPIOx     = KEY_L_GPIO_Port,
@@ -106,6 +111,20 @@ void RobotCMDTask(void)
     // // data_pc = 1;
     // // HAL_UART_Transmit(&huart3, (uint8_t *)data_pc, strlen(data_pc), HAL_MAX_DELAY);
 
+    // 帧头
+    buffer[0] = 0x5A;
+
+    // 将float数据拷贝到缓冲区
+    memcpy(buffer+1, &eul_raw[0], sizeof(float));
+    memcpy(buffer+5, &eul_raw[2], sizeof(float));
+    memcpy(buffer+9, &eul_raw[1], sizeof(float));
+
+    // 帧尾
+    buffer[13] = 0xA5;
+
+    // 通过UART发送数据
+    HAL_UART_Transmit(&huart3, buffer, sizeof(buffer), HAL_MAX_DELAY);
+
     float dt = chassis_fetch_data.dt;
     //导航模式 CHASSIS_GOTO_POINT
     if (chassis_cmd_send.chassis_mode == CHASSIS_GOTO_POINT &&
@@ -127,7 +146,6 @@ void RobotCMDTask(void)
     RobotEnableSet(key_l); //左按键控制扫地机运行模式
 
 // TODO: 从PC获取指令并设置vx和wz的值
-
 PubPushMessage(chassis_cmd_pub, (void *)&chassis_cmd_send); // 发布指令到机器人底盘
 PubPushMessage(robot_state_pub, (void *)&robot_status);     // 发布机器人状态到PC
 

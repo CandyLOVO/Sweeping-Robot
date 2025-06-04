@@ -1,15 +1,8 @@
-/**
- * @file    chassis_speed_kf.c
- * @brief   对机器人线速度 (vx) 与角速度 (wz) 进行卡尔曼滤波，
- *          同时融合 编码器的 (vx,wz) 和 IMU 的 wz 观测
- */
+//对机器人线速度 (vx) 与角速度 (wz) 进行卡尔曼滤波
 
-#include "chassis_speed_kf.h"
+#include "speed_kf.h"
 #include <string.h>
 
-/**
- * @brief KF 初始化：状态维 2 (vx,wz)，测量维 3 (vxEnc, wzEnc, wzImu)
- */
 void ChassisSpeedKF_Init(ChassisSpeedKF_t *kfObj,
                          float q_vx,
                          float q_wz,

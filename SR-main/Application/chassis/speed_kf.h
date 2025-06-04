@@ -1,10 +1,5 @@
-/**
- * @file    chassis_speed_kf.h
- * @brief   对机器人线速度 (vx) 和角速度 (wz) 进行卡尔曼滤波估计（支持添加陀螺仪wz观测）
- */
-
-#ifndef __CHASSIS_SPEED_KF_H
-#define __CHASSIS_SPEED_KF_H
+#ifndef __SPEED_KF_H
+#define __SPEED_KF_H
 
 #include "kalman_filter.h"
 

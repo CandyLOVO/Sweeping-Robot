@@ -1,5 +1,5 @@
+//定义扫地机运行模式、状态枚举、控制命令格式、传感器数据格式
 #pragma once
-
 #include "stdint.h"
 #include "stdbool.h"
 
@@ -7,15 +7,12 @@
 
 #define VISION_USE_UART // 是否使用硬件串口
 
-#pragma pack(1) // Code alignment for structure packing
-
-// The state of the robot
+#pragma pack(1)
 typedef enum {
     ROBOT_STOP = 0,
     ROBOT_READY,
 } Robot_Status_e;
 
-// The mode of the chassis
 typedef enum {
     CHASSIS_ZERO_FORCE = 0, // stop mode
     CHASSIS_NORMAL,

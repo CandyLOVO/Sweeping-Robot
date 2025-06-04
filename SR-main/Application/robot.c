@@ -1,9 +1,9 @@
+//扫地机整体系统顶层初始化入口
 #include "robot.h"
 #include "robot_task.h"
 #include "robot_def.h"
 #include "robot_cmd.h"
 #include "chassis.h"
-
 #include "bsp_init.h"
 #include "LED.h"
 
